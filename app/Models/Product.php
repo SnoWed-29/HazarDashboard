@@ -18,7 +18,8 @@ class Product extends Model
         "is_featured",
         "in_stock",
         "on_sale",
-        "subCategory_id"
+        "subCategory_id",
+        "cost"
     ];
 
     public function subCategory()
