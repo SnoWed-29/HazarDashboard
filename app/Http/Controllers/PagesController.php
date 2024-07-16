@@ -36,6 +36,25 @@ class PagesController extends Controller
             'subs'=>$subcategories
         ]);
     }
+
+    public function editProduct($slug){
+        
+        $product = Product::where('slug', $slug)->first();
+        $categories = Category::all();
+        $subcategories = SubCategory::all();
+
+        if(!$product){
+            return abort(404);
+        }
+        
+        return view('pages.edit-product')->with([
+            'product'=>$product,
+            'cats'=>$categories,
+            'subs'=>$subcategories
+        ]);
+    }
+
+
     public function test(){
         SubCategory::where('id', 1)->delete();
         SubCategory::where('id', 2)->delete();

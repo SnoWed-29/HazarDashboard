@@ -10,6 +10,8 @@ Route::get('/',[PagesController::class , 'index'])->name('homePage');
 Route::get('/add-product', [PagesController::class, 'addProdcutPage'])->name('addProdcutPage');
 Route::get('/add-category', [PagesController::class, 'addCategoryPage'])->name('addCategoryPage');
 Route::get('/add-subcategory', [PagesController::class, 'addSubCategory'])->name('addSubCategoryPage');
+Route::get('/edit-product/{slug}', [PagesController::class, 'editProduct'])->name('editProduct');
+
 
 Route::post('/create-category', [CategoryController::class, 'createCategory'])->name('createCategory');
 Route::post('/create-product', [ProductController::class, 'createProduct'])->name('createProduct');
@@ -20,6 +22,5 @@ Route::get('/get-subcategories/{categoryId}', [CategoryController::class, 'getSu
 
 Route::get('/test',[PagesController::class , 'test']);
 
-
-// Images , Providers , Composition, featured,
+//Providers , Composition
 // delete Images from products
