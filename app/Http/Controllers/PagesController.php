@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Color;
 use App\Models\Product;
+use App\Models\Size;
 use App\Models\SubCategory;
-use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class PagesController extends Controller
 {
@@ -37,29 +39,60 @@ class PagesController extends Controller
         ]);
     }
 
-    public function editProduct($slug){
-        
-        $product = Product::where('slug', $slug)->first();
-        $categories = Category::all();
-        $subcategories = SubCategory::all();
+    public function editProduct($slug)
+{
+    $product = Product::with('prodColorSizes.size')->where('slug', $slug)->first();
 
-        if(!$product){
-            return abort(404);
-        }
-        
-        return view('pages.edit-product')->with([
-            'product'=>$product,
-            'cats'=>$categories,
-            'subs'=>$subcategories
+    if (!$product) {
+        return abort(404);
+    }
+   
+    $categories = Category::all();
+    $subcategories = SubCategory::all();
+    $colors = Color::all();
+    $sizes = Size::all();
+
+    return view('pages.edit-product')->with([
+        'product' => $product,
+        'cats' => $categories,
+        'subs' => $subcategories,
+        'colors' => $colors,
+        'sizes' => $sizes,
+    ]);
+}
+
+
+    public function addVariantsPage() {
+        $sizes = Size::all();
+        $colors = Color::all();
+        return view('pages.create-variants')->with([
+            'sizes'=>$sizes,
+            'colors'=>$colors,
         ]);
     }
 
+    public function listProducts()
+    {
+        return view('pages.list-products');
+    }
 
-    public function test(){
-        SubCategory::where('id', 1)->delete();
-        SubCategory::where('id', 2)->delete();
-        SubCategory::where('id', 3)->delete();
-        
-        return dd(SubCategory::all()); 
+    public function getProductsData()
+    {
+        $products = Product::with(['colors', 'subCategory.category', 'prodColorSizes'])->get();
+
+        return DataTables::of($products)
+            ->addColumn('colors', function ($product) {
+                return $product->colors->pluck('name')->implode(', ');
+            })
+            ->addColumn('category', function ($product) {
+                return $product->subCategory->category->name ?? '';
+            })
+            ->addColumn('sub_category', function ($product) {
+                return $product->subCategory->name ?? '';
+            })
+            ->addColumn('quantity', function ($product) {
+                return $product->prodColorSizes->sum('quantity');
+            })
+            ->make(true);
     }
 }

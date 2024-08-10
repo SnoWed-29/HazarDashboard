@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Size extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        "name",
-        "code"
+        'name',
+        'code',
     ];
-    public function products()
+
+    public function prodColorSizes()
     {
-        return $this->belongsToMany(ProdColor::class, 'items', 'size_id', 'prod_color_id');
+        return $this->hasMany(ProdColorSize::class, 'size_id');
     }
 }

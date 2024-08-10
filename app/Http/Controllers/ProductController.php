@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Color;
 use App\Models\Image;
 use App\Models\Product;
+use App\Models\Size;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 function createUniqueSlug($name, $model)
@@ -81,11 +84,87 @@ class ProductController extends Controller
         throw $th;
     }
 
-    return redirect()->route('editProduct', ['slug' => $product->slug])->with('success', 'Ste one of Creating the product is successfull. ');
+    return redirect()->route('editProduct', ['slug' => $product->slug])->with('success', 'Step one of Creating the product is successfull. ');
 
 }
-    
-    
+
+    public function createColor(Request $request){
+            
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'code'=>'required'
+        ]);
+        $color = Color::create([
+            'name'=>$validatedData['name'],
+            'code'=>$validatedData['code'],
+        ]);
+        if(!$color){
+            return redirect()->back()->with('error', 'Failed to create The Color');
+        }
+            return redirect()->route('addVariantsPage')->with('success', ' Size is created successfully. ');
+    }
+
+    public function createSize (Request $request){
+        
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'code'=>'required'
+        ]);
+        
+         $size = Size::create([
+            'name'=>$validatedData['name'],
+            'code'=>$validatedData['code'],
+         ]);
+
+         if(!$size){
+            return redirect()->back()->with('error', 'Failed to create The Size');
+         }
+            return redirect()->route('addVariantsPage')->with('success', ' Size is created successfully. ');
+    }
+
+    public function handleVarients(Request $request, $id)
+{
+    $product = Product::findOrFail($id);
+    $request->validate([
+        'variants.colors' => 'required|array',
+        'variants.colors.*' => 'integer|exists:colors,id',
+        'variants.sizes' => 'required|array',
+        'variants.sizes.*' => 'integer|exists:sizes,id',
+        'variants.quantities' => 'required|array',
+        'variants.quantities.*' => 'integer|min:1',
+    ]);
+
+    // Clear existing variants
+    foreach ($product->colors as $color) {
+        $product->colors()->detach($color->id);
+    }
+
+    // Handle the variants
+    foreach ($request->variants['colors'] as $index => $colorId) {
+        $sizeId = $request->variants['sizes'][$index];
+        $quantity = $request->variants['quantities'][$index];
+
+        // Attach the color to the product
+        $product->colors()->attach($colorId);
+
+        // Find the prod_color pivot id
+        $prodColor = DB::table('prod_color')
+            ->where('product_id', $product->id)
+            ->where('color_id', $colorId)
+            ->first();
+
+        // Attach the size and quantity to the prod_color_size table
+        DB::table('prod_color_size')->insert([
+            'prod_color_id' => $prodColor->id,
+            'size_id' => $sizeId,
+            'quantity' => $quantity,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Variants updated successfully');
+}
 
 
 }

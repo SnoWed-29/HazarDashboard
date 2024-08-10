@@ -21,9 +21,9 @@ class subCategoryController extends Controller
             'category_id'=>$validatedData['category']
         ]);
         if($SubCategory){
-            return dd('nadi');
+            return redirect()->back()->with('success', 'subCategory created successfully');
         }
 
-        return dd('oh shiit');
+        return redirect()->back()->with('error', 'error creating subCategory');
     }
 }

@@ -29,14 +29,16 @@ class CategoryController extends Controller
         ]);
 
         if($category){
-            return dd('created succesfully');
+            return redirect()->back()->with('success', 'Category created successfully');
+
         }
-        return dd('failed');
+        return redirect()->back()->with('error', 'error creating Category');
+
     
     }
-            public function getSubcategories($categoryId)
-        {
+    public function getSubcategories($categoryId)
+    {
             $subCategories = SubCategory::where('category_id', $categoryId)->get();
             return response()->json($subCategories);
-        }
+    }
 }

@@ -8,15 +8,27 @@ use Illuminate\Database\Eloquent\Model;
 class ProdColor extends Model
 {
     use HasFactory;
-    protected $table = "prod_color";
+
+    protected $table = 'prod_color';
+
     protected $fillable = [
         'product_id',
         'color_id',
     ];
-    
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function color()
+    {
+        return $this->belongsTo(Color::class, 'color_id');
+    }
+
     public function sizes()
     {
-        return $this->belongsToMany(Size::class, 'items', 'prod_color_id', 'size_id');
+        return $this->hasMany(ProdColorSize::class, 'prod_color_id');
     }
 
    
