@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-semibold text-center border-b border-gray-400">Ajouter Une Category</h1>
         </div>
 
-        <div class="w-3/4 mx-auto my-8">
+        <div class="w-3/4 mx-auto my-8  mx-auto p-2 shadow-xl rounded-md">
             <form action="{{route('createCategory')}}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('POST')
@@ -31,37 +31,39 @@
 
         
 
-<div class="relative overflow-x-auto">
-    <table id="cats" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-                <th scope="col" class="px-6 py-3">
-                    id
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    name
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    slug
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($cats as $cat)
-            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                    {{$cat->id}}
-                </th>
-                <td class="px-6 py-4">
-                    {{$cat->name}}
-                </td>
-                <td class="px-6 py-4">
-                    {{$cat->slug}}
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+<div class="w-3/4 mx-auto p-2 shadow-xl rounded-md">
+    <div class="relative overflow-x-auto">
+        <table id="cats" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        id
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        name
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        slug
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($cats as $cat)
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        {{$cat->id}}
+                    </th>
+                    <td class="px-6 py-4">
+                        {{$cat->name}}
+                    </td>
+                    <td class="px-6 py-4">
+                        {{$cat->slug}}
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
 <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js" ></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -71,5 +73,38 @@
     new DataTable('#cats');
 
 </script>
-    </div>
+<style>
+    /* Custom styles for DataTables elements */
+    #cats_filter {
+        float: right;
+    }
+
+    #cats_length {
+        float: left;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 0.25rem 0.5rem;
+        margin: 0.25rem; /* Add vertical margin here */
+        border-radius: 0.375rem;
+        border: 1px solid #ddd;
+        background-color: #f9fafb;
+        color: #4b5563;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: #e5e7eb;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 1rem; /* Add some space above the pagination controls */
+        margin-bottom: 1rem; /* Add some space below the pagination controls */
+    }
+    input[type=search] {
+        height: 33px;
+        border-radius: 4px;
+        margin: 0 10px;
+    }
+</style>
+
 @endsection

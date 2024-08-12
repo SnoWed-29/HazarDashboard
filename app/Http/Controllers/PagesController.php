@@ -73,7 +73,11 @@ class PagesController extends Controller
 
     public function listProducts()
     {
-        return view('pages.list-products');
+        $products = Product::with(['colors', 'subCategory.category', 'prodColorSizes', 'images'])->get();
+        // dd($products);
+        return view('pages.list-products')->with([
+            'products'=>$products
+        ]);
     }
 
     public function getProductsData()
