@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Color;
 use App\Models\Image;
+use App\Models\ProdColor;
+use App\Models\ProdColorSize;
 use App\Models\Product;
 use App\Models\Size;
 use Illuminate\Http\Request;
@@ -123,48 +125,122 @@ class ProductController extends Controller
     }
 
     public function handleVarients(Request $request, $id)
-{
-    $product = Product::findOrFail($id);
-    $request->validate([
-        'variants.colors' => 'required|array',
-        'variants.colors.*' => 'integer|exists:colors,id',
-        'variants.sizes' => 'required|array',
-        'variants.sizes.*' => 'integer|exists:sizes,id',
-        'variants.quantities' => 'required|array',
-        'variants.quantities.*' => 'integer|min:1',
-    ]);
-
-    // Clear existing variants
-    foreach ($product->colors as $color) {
-        $product->colors()->detach($color->id);
-    }
-
-    // Handle the variants
-    foreach ($request->variants['colors'] as $index => $colorId) {
-        $sizeId = $request->variants['sizes'][$index];
-        $quantity = $request->variants['quantities'][$index];
-
-        // Attach the color to the product
-        $product->colors()->attach($colorId);
-
-        // Find the prod_color pivot id
-        $prodColor = DB::table('prod_color')
-            ->where('product_id', $product->id)
-            ->where('color_id', $colorId)
-            ->first();
-
-        // Attach the size and quantity to the prod_color_size table
-        DB::table('prod_color_size')->insert([
-            'prod_color_id' => $prodColor->id,
-            'size_id' => $sizeId,
-            'quantity' => $quantity,
-            'created_at' => now(),
-            'updated_at' => now(),
+    {
+        $product = Product::findOrFail($id);
+        $request->validate([
+            'variants.colors' => 'required|array',
+            'variants.colors.*' => 'integer|exists:colors,id',
+            'variants.sizes' => 'required|array',
+            'variants.sizes.*' => 'integer|exists:sizes,id',
+            'variants.quantities' => 'required|array',
+            'variants.quantities.*' => 'integer|min:1',
         ]);
+    
+        // Clear existing variants
+        foreach ($product->colors as $color) {
+            $product->colors()->detach($color->id);
+        }
+    
+        // Handle the variants
+        foreach ($request->variants['colors'] as $index => $colorId) {
+            $sizeId = $request->variants['sizes'][$index];
+            $quantity = $request->variants['quantities'][$index];
+    
+            // Attach the color to the product
+            $product->colors()->attach($colorId);
+    
+            // Find the prod_color pivot id
+            $prodColor = DB::table('prod_color')
+                ->where('product_id', $product->id)
+                ->where('color_id', $colorId)
+                ->first();
+    
+            // Update or insert the size and quantity to the prod_color_size table
+            DB::table('prod_color_size')->updateOrInsert(
+                [
+                    'prod_color_id' => $prodColor->id,
+                    'size_id' => $sizeId
+                ],
+                [
+                    'quantity' => DB::raw('quantity + '.$quantity),
+                    'updated_at' => now()
+                ]
+            );
+        }
+    
+        return redirect()->back()->with('success', 'Variants updated successfully');
     }
+   
+            public function getSizes($productId, $colorId){
+            $sizes = ProdColorSize::whereHas('prodColor', function ($query) use ($productId, $colorId) {
+                    $query->where('product_id', $productId)
+                        ->where('color_id', $colorId);
+                })
+                ->with('size') // Load size relationship
+                ->get()
+                ->pluck('size'); // Get the sizes directly
 
-    return redirect()->back()->with('success', 'Variants updated successfully');
-}
+            return response()->json($sizes);
+        }
 
+        public function placeOrder(Request $request, $prodId) {
+            $requestData = $request->validate([
+                'variants.colors' => 'required|array',
+                'variants.colors.*' => 'integer|exists:colors,id',
+                'variants.sizes' => 'required|array',
+                'variants.sizes.*' => 'integer|exists:sizes,id',
+                'variants.quantities' => 'required|array',
+                'variants.quantities.*' => 'integer|min:1',
+            ]);
+        
+            $colors = $requestData['variants']['colors'];
+            $sizes = $requestData['variants']['sizes'];
+            $quantities = $requestData['variants']['quantities'];
+        
+            $variants = [];
+        
+            foreach ($colors as $index => $color) {
+                if (isset($sizes[$index]) && isset($quantities[$index])) {
+                    $variants[] = [
+                        'color' => $color,
+                        'size' => $sizes[$index],
+                        'quantity' => $quantities[$index],
+                    ];
+                }
+            }
+        
+            foreach($variants as $var) {
+                $colorId = $var['color'];
+                $sizeId = $var['size'];
+                $quantity = $var['quantity'];
+        
+                // Check if ProdColor entry exists
+                $prodColor = ProdColor::where('product_id', $prodId)
+                                      ->where('color_id', $colorId)
+                                      ->first();
+                
+                if ($prodColor) {
+                    // Check if ProdSizeColor entry exists with the required size and quantity
+                    $prodSizeColor = ProdColorSize::where('prod_color_id', $prodColor->id)
+                                                  ->where('size_id', $sizeId)
+                                                  ->first();
+                                                  
+                    if ($prodSizeColor && $prodSizeColor->quantity >= $quantity) {
+                        // Process the order or deduct the quantity
+                        // E.g., deduct the quantity from the stock
+                        $prodSizeColor->quantity -= $quantity;
+                        $prodSizeColor->save();
+                    } else {
+                        return dd('The requested size or quantity is not available for the selected color.');
+                    }
+                } else {
+                    return dd('The requested color is not available for the product.');
+                }
+            }
+        
+            return redirect()->back()->with('success', 'Order placed successfully.');
+        }
+        
+        
 
 }

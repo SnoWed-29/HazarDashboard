@@ -22,6 +22,8 @@ Route::post('/create-category', [CategoryController::class, 'createCategory'])->
 Route::post('/create-product', [ProductController::class, 'createProduct'])->name('createProduct');
 Route::post('/create-subcategory', [subCategoryController::class, 'createSubCategory'])->name('createSubCategory');
 
+Route::post('/place-order/product/{prodId}', [ProductController::class, 'placeOrder'])->name('placeOrder');
+
 Route::post('/create-size', [ProductController::class, 'createSize'])->name('createSize');
 Route::post('/create-color', [ProductController::class, 'createColor'])->name('createColor');
 
@@ -29,6 +31,7 @@ Route::post('/handle-var/{id}', [ProductController::class, 'handleVarients'])->n
 
 // ajax 
 Route::get('/get-subcategories/{categoryId}', [CategoryController::class, 'getSubcategories']);
+Route::get('/product/{productId}/sizes/{colorId}', [ProductController::class, 'getSizes']);
 
 Route::get('/test',[PagesController::class , 'test']);
 

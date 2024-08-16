@@ -24,15 +24,7 @@
     <div class="p-1">
         <div class="container mx-auto flex justify-center py-1">
             <h1 class="text-2xl font-semibold text-center border-b border-gray-400">Ajouter Un Produit</h1><br>
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+
 
         </div>
 
