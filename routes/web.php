@@ -7,7 +7,7 @@ use App\Http\Controllers\subCategoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/',[PagesController::class , 'index'])->name('homePage');
-Route::get('/add-product', [PagesController::class, 'addProdcutPage'])->name('addProdcutPage');
+Route::get('/add-product', [PagesController::class, 'addProdcutPage'])->name('addProductPage');
 Route::get('/add-category', [PagesController::class, 'addCategoryPage'])->name('addCategoryPage');
 Route::get('/add-subcategory', [PagesController::class, 'addSubCategory'])->name('addSubCategoryPage');
 Route::get('/edit-product/{slug}', [PagesController::class, 'editProduct'])->name('editProduct');

@@ -7,7 +7,9 @@ use App\Models\Color;
 use App\Models\Product;
 use App\Models\Size;
 use App\Models\SubCategory;
+use PDO;
 use Yajra\DataTables\Facades\DataTables;
+
 
 class PagesController extends Controller
 {
@@ -73,12 +75,16 @@ class PagesController extends Controller
 
     public function listProducts()
     {
-        $products = Product::with(['colors', 'subCategory.category', 'prodColorSizes.size', 'images'])->get();  
+        $products = Product::with(['colors', 'subCategory.category', 'prodColorSizes.size', 'images'])->get();
+        if($products->isEmpty()) {
+            return redirect()->route('addProductPage');
+        }
+        
         $colors = Color::all();
         $sizes = Size::all();
         // dd($products);
         return view('pages.list-products')->with([
-            'products'=>$products,
+            'products' => $products ?: [],
             'colors' => $colors,
             'sizes' => $sizes,
         ]);
